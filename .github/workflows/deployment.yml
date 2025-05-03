@@ -57,6 +57,16 @@ jobs:
 
         echo "value=$RESOLVED_VALUE" >> "$GITHUB_OUTPUT"
 
+
+    - name: Create Stable Git Tag
+      id: create_stable_tag
+      uses: mathieudutour/github-tag-action@v6.2
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        custom_tag: ${{ steps.version.outputs.value }}
+        default_bump: false
+        default_prerelease_bump: false
+
     - name: Generate image metadata (tags, labels)
       id: meta
       uses: docker/metadata-action@v5
