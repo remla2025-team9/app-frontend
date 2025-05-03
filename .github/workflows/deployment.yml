@@ -2,7 +2,7 @@ name: Continuous Deployment
 
 on:
   push:
-    branches: [main]        
+    branches: [3-cicd-workflow]        
     tags:     ['v*.*.*']
   # For testing purposes, you can trigger the workflow manually
   workflow_dispatch:
@@ -18,17 +18,15 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Bump patch‑pre tag on main
-      id: bump
-      if: github.ref == 'refs/heads/main'
+    - name: Get current version
+      id: get_version
+      if: github.ref == 'refs/heads/3-cicd-workflow'
       uses: mathieudutour/github-tag-action@v6.2
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        pre_release_branches: main
-        default_prerelease_bump: prepatch      
-        append_to_pre_release_tag: pre        
+        default_prerelease_bump: false      
+        default_bump: false
         tag_prefix: v
-        default_bump: patch
 
     - name: Resolve version
       id: version
@@ -36,7 +34,7 @@ jobs:
         if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
           echo "value=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
         else
-          echo "value=${{ steps.bump.outputs.new_version }}" >> "$GITHUB_OUTPUT"
+          echo "value=${{ steps.get_version.outputs.new_version }}" >> "$GITHUB_OUTPUT"
         fi
 
     - name: Generate image metadata (tags, labels)
@@ -61,3 +59,15 @@ jobs:
         context: .
         push: true
         tags:   ${{ steps.meta.outputs.tags }}
+
+    - name: Bump patch and add pre tag
+      id: bump_patch
+      if: github.ref == 'refs/heads/3-cicd-workflow'
+      uses: mathieudutour/github-tag-action@v6.2
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        pre_release_branches: 3-cicd-workflow
+        default_prerelease_bump: prepatch      
+        append_to_pre_release_tag: pre        
+        tag_prefix: v
+        default_bump: patch
