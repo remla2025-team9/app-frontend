@@ -31,11 +31,17 @@ jobs:
     - name: Resolve version
       id: version
       run: |
-        if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-          echo "value=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
-        else
-          echo "value=${{ steps.get_version.outputs.new_version }}" >> "$GITHUB_OUTPUT"
-        fi
+        PREVIOUS_TAG="${{ steps.get_version.outputs.previous_tag }}"
+        RESOLVED_VALUE="" # Initialize variable
+
+        if [[ "${{ github.ref }}" == refs/tags/v*.*.* ]]; then
+          RESOLVED_VALUE="${GITHUB_REF#refs/tags/v}"
+          echo "Triggered by tag push. Using version: $RESOLVED_VALUE"
+
+        elif [[ -n "$PREVIOUS_TAG" ]]; then
+          BASE_TAG_WITH_V="${PREVIOUS_TAG%-pre.*}"
+          # RESOLVED_VALUE="${BASE_TAG_WITH_V#v}"
+          echo "Not triggered by tag. Stripped pre-release from '$PREVIOUS_TAG' to get base version: $RESOLVED_VALUE"
 
     - name: Generate image metadata (tags, labels)
       id: meta

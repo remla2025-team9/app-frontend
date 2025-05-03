@@ -2,7 +2,7 @@ name: Continuous Delivery
 
 on:
   push:
-    branches: [3-cicd-workflow]        
+    branches: [main]        
     tags:     ['v*.*.*']
   # For testing purposes, you can trigger the workflow manually
   workflow_dispatch:
