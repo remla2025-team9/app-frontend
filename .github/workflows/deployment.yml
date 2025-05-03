@@ -42,6 +42,14 @@ jobs:
           BASE_TAG_WITH_V="${PREVIOUS_TAG%-pre.*}"
           # RESOLVED_VALUE="${BASE_TAG_WITH_V#v}"
           echo "Not triggered by tag. Stripped pre-release from '$PREVIOUS_TAG' to get base version: $RESOLVED_VALUE"
+        
+        else
+          # Handle cases where it's not a tag push AND no previous tag was found
+          echo "::warning::Not a tag push and no previous tag found by 'get_version' step."
+          echo "::error::Cannot resolve version."
+          exit 1 # Fail the job if version can't be resolved
+          
+        fi
 
     - name: Generate image metadata (tags, labels)
       id: meta
