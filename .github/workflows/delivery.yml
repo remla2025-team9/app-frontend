@@ -1,0 +1,35 @@
+name: Continuous Delivery
+
+on:
+  push:
+    branches: [3-cicd-workflow]        
+    tags:     ['v*.*.*']
+  # For testing purposes, you can trigger the workflow manually
+  workflow_dispatch:
+
+permissions:
+  contents: write    
+
+jobs:
+  build-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Bump patch‑pre tag on 3-cicd-workflow
+      id: tag_version
+      if: github.ref == 'refs/heads/3-cicd-workflow'
+      uses: mathieudutour/github-tag-action@v6.2
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        pre_release_branches: 3-cicd-workflow
+        default_prerelease_bump: prerelease      
+        append_to_pre_release_tag: pre        
+        tag_prefix: v
+        default_bump: patch
+
+    - name: Print New Tag
+      if: steps.tag_version.outputs.new_tag != ''
+      run: |
+        echo "Successfully tagged commit with: ${{ steps.tag_version.outputs.new_tag }}"
