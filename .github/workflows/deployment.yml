@@ -1,10 +1,7 @@
-name: Continuous Deployment
+name: Deployment
 
 on:
-  push:
-    branches: [3-cicd-workflow]        
-    tags:     ['v*.*.*']
-  # For testing purposes, you can trigger the workflow manually
+  # Manual deployment trigger
   workflow_dispatch:
 
 permissions:
@@ -32,11 +29,10 @@ jobs:
 
     - name: Get current version
       id: get_version
-      if: github.ref == 'refs/heads/3-cicd-workflow'
       uses: mathieudutour/github-tag-action@v6.2
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        pre_release_branches: 3-cicd-workflow
+        pre_release_branches: main
         default_prerelease_bump: false      
         default_bump: false
         append_to_pre_release_tag: pre        
@@ -112,11 +108,11 @@ jobs:
 
     - name: Bump patch and add pre tag
       id: bump_patch
-      if: github.ref == 'refs/heads/3-cicd-workflow'
+      if: github.ref == 'refs/heads/main'
       uses: mathieudutour/github-tag-action@v6.2
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        pre_release_branches: 3-cicd-workflow
+        pre_release_branches: main
         default_prerelease_bump: prepatch      
         append_to_pre_release_tag: pre        
         tag_prefix: v

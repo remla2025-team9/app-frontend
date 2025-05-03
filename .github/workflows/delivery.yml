@@ -1,11 +1,9 @@
-name: Continuous Delivery
+name: Delivery
 
 on:
   push:
     branches: [main]        
     tags:     ['v*.*.*']
-  # For testing purposes, you can trigger the workflow manually
-  workflow_dispatch:
 
 permissions:
   contents: write    
@@ -17,13 +15,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Bump patch‑pre tag on 3-cicd-workflow
+    - name: Bump patch‑pre tag
       id: tag_version
-      if: github.ref == 'refs/heads/3-cicd-workflow'
+      if: github.ref == 'refs/heads/main'
       uses: mathieudutour/github-tag-action@v6.2
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        pre_release_branches: 3-cicd-workflow
+        pre_release_branches: main
         default_prerelease_bump: prerelease      
         append_to_pre_release_tag: pre        
         tag_prefix: v

@@ -1,10 +1,8 @@
-name: Continuous Integration
+name: Integration
 
 on:
   pull_request:
-  # For testing purposes, you can trigger the workflow manually
-  workflow_dispatch:
-  
+    branches: [main]        
 
 jobs:
   build:
