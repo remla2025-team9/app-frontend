@@ -29,6 +29,7 @@ jobs:
         pre_release_branches: 3-cicd-workflow
         default_prerelease_bump: false      
         default_bump: false
+        append_to_pre_release_tag: pre        
         tag_prefix: v
 
     - name: Resolve version
