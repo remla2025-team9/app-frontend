@@ -11,21 +11,12 @@ permissions:
 jobs:
 
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
     - uses: actions/checkout@v4  
       with:
         fetch-depth: 0
-
-    - name: Install dependencies
-      run: |
-        npm ci
-
-    
-    - name: Lint and format check
-      run: |
-        npm run lint
 
     - name: Get current version
       id: get_version
@@ -105,6 +96,8 @@ jobs:
         platforms: linux/amd64,linux/arm64
         push: true
         tags:   ${{ steps.meta.outputs.tags }}
+        cache-from: type=registry,ref=${{ steps.meta.outputs.images }}:latest
+        cache-to: type=registry,ref=${{ steps.meta.outputs.images }}:latest,mode=max,image-manifest=true
 
     - name: Bump patch and add pre tag
       id: bump_patch
