@@ -11,7 +11,7 @@ permissions:
   contents: write    
 
 jobs:
-  build-publish:
+  update-tag:
     runs-on: ubuntu-latest
 
     steps:
@@ -28,8 +28,3 @@ jobs:
         append_to_pre_release_tag: pre        
         tag_prefix: v
         default_bump: patch
-
-    - name: Print New Tag
-      if: steps.tag_version.outputs.new_tag != ''
-      run: |
-        echo "Successfully tagged commit with: ${{ steps.tag_version.outputs.new_tag }}"
