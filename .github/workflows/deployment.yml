@@ -26,6 +26,7 @@ jobs:
       uses: mathieudutour/github-tag-action@v6.2
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
+        pre_release_branches: 3-cicd-workflow
         default_prerelease_bump: false      
         default_bump: false
         tag_prefix: v
@@ -52,6 +53,8 @@ jobs:
           exit 1 # Fail the job if version can't be resolved
 
         fi
+
+        echo "value=$RESOLVED_VALUE" >> "$GITHUB_OUTPUT"
 
     - name: Generate image metadata (tags, labels)
       id: meta
