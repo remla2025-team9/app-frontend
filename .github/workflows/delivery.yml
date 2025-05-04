@@ -2,7 +2,7 @@ name: Delivery
 
 on:
   push:
-    branches: [main]        
+    branches: [7-workflow-fix]        
     tags:     ['v*.*.*']
 
 permissions:
