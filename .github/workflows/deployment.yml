@@ -1,12 +1,14 @@
 name: Deployment
 
 on:
-  # Manual deployment trigger
   workflow_dispatch:
 
 permissions:
   contents: write    
-  packages:  write        
+  packages:  write      
+  
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
 
 jobs:
 
@@ -77,8 +79,9 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
+        images: ${{ env.IMAGE_NAME }}       
         tags: |
+          type=sha,enable=false
           type=raw,value=latest
           type=raw,value=${{ steps.version.outputs.value }}
 
@@ -96,8 +99,8 @@ jobs:
         platforms: linux/amd64,linux/arm64
         push: true
         tags:   ${{ steps.meta.outputs.tags }}
-        cache-from: type=registry,ref=${{ steps.meta.outputs.images }}:latest
-        cache-to: type=registry,ref=${{ steps.meta.outputs.images }}:latest,mode=max,image-manifest=true
+        cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache
+        cache-to: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache,mode=max,image-manifest=true
 
     - name: Bump patch and add pre tag
       id: bump_patch
