@@ -19,11 +19,11 @@ jobs:
 
     - name: Bump patch‑pre tag
       id: tag_version
-      if: github.ref == 'refs/heads/main'
+      if: github.ref == 'refs/heads/7-workflow-fix'
       uses: mathieudutour/github-tag-action@v6.2
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        pre_release_branches: main
+        pre_release_branches: 7-workflow-fix
         default_prerelease_bump: prerelease      
         append_to_pre_release_tag: pre        
         tag_prefix: v
