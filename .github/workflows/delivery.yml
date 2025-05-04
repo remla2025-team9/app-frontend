@@ -4,6 +4,8 @@ on:
   push:
     branches: [7-workflow-fix]        
     tags:     ['v*.*.*']
+  # Manual deployment trigger
+  workflow_dispatch:
 
 permissions:
   contents: write    
