@@ -50,6 +50,8 @@ export default function Home() {
   const [pendingClassification, setPendingClassification] = useState<Classification | null>(null)
   const [confirmedClassification, setConfirmedClassification] = useState(false)
 
+  const appFrontendVersion = process.env.NEXT_PUBLIC_APP_VERSION || "Not set"
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: { review: "" }
@@ -93,6 +95,17 @@ export default function Home() {
 
   return (
     <div className="max-w-screen-sm mx-auto w-full px-4 sm:px-6 my-12">
+      <div className="flex flex-col mb-6">
+        <p className="text-xs text-muted-foreground">
+          App frontend version: <span className="font-semibold ml-1 text-blue-500">{appFrontendVersion}</span>
+        </p>
+        <p className="text-xs text-muted-foreground">
+          App service version: <span className="font-semibold ml-1 text-blue-500">{appFrontendVersion}</span>
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Model service version: <span className="font-semibold ml-1 text-blue-500">{appFrontendVersion}</span>
+        </p>
+      </div>
       {!isSubmitted ? (
         <>
           <h1 className="text-display-sm mb-2">Rate your visit to our restaurant</h1>
