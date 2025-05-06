@@ -1,98 +1,143 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { z } from "zod"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form"
-import { Textarea } from "@/components/ui/textarea"
-import { Separator } from "@/components/ui/separator"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { X, Check, ArrowRight, ArrowRightLeft, RefreshCcw } from "lucide-react"
+import { useState, useEffect } from "react";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { X, Check, ArrowRight, ArrowRightLeft, RefreshCcw } from "lucide-react";
+import { fetchAppServiceVersion, ServiceVersionInfo } from '@/services/appService';
 
-const classifications = ["positive", "negative", "neutral"] as const
-type Classification = typeof classifications[number]
+const classifications = ["positive", "negative", "neutral"] as const;
+type Classification = typeof classifications[number];
 
 const FormSchema = z.object({
-  review: z.string().min(1, { message: "Review must not be empty." })
-})
+  review: z.string().min(1, { message: "Review must not be empty." }),
+});
 
 const simulateAiClassification = (reviewText: string): Classification => {
-  const lowerCaseReview = reviewText.toLowerCase()
+  const lowerCaseReview = reviewText.toLowerCase();
   if (
     lowerCaseReview.includes("great") ||
     lowerCaseReview.includes("excellent") ||
     lowerCaseReview.includes("love") ||
     lowerCaseReview.includes("amazing")
   ) {
-    return "positive"
+    return "positive";
   } else if (
     lowerCaseReview.includes("bad") ||
     lowerCaseReview.includes("terrible") ||
     lowerCaseReview.includes("disappointing") ||
     lowerCaseReview.includes("poor")
   ) {
-    return "negative"
+    return "negative";
   } else {
-    return "neutral"
+    return "neutral";
   }
-}
+};
 
 export default function Home() {
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  const [submittedReview, setSubmittedReview] = useState("")
-  const [aiClassification, setAiClassification] = useState<Classification | null>(null)
-  const [userClassification, setUserClassification] = useState<Classification | null>(null)
-  const [editing, setEditing] = useState(false)
-  const [pendingClassification, setPendingClassification] = useState<Classification | null>(null)
-  const [confirmedClassification, setConfirmedClassification] = useState(false)
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submittedReview, setSubmittedReview] = useState("");
+  const [aiClassification, setAiClassification] = useState<Classification | null>(null);
+  const [userClassification, setUserClassification] = useState<Classification | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [pendingClassification, setPendingClassification] = useState<Classification | null>(null);
+  const [confirmedClassification, setConfirmedClassification] = useState(false);
+
+  // State for service versions
+  const [serviceVersions, setServiceVersions] = useState<ServiceVersionInfo | null>(null);
+  const [versionsLoading, setVersionsLoading] = useState<boolean>(true);
+  const [versionsError, setVersionsError] = useState<Error | null>(null);
+
+
+  const appFrontendVersion = process.env.NEXT_PUBLIC_APP_VERSION || "NOT_SET";
+
+  useEffect(() => {
+    const getVersions = async () => {
+      try {
+        setVersionsLoading(true);
+        setVersionsError(null);
+        const data = await fetchAppServiceVersion();
+        setServiceVersions(data);
+      } catch (err) {
+        setVersionsError(err instanceof Error ? err : new Error(String(err)));
+        console.error("Error fetching app and model service version information:", err);
+        toast.error("Failed to load app and model service version information.");
+      } finally {
+        setVersionsLoading(false);
+      }
+    };
+
+    getVersions();
+  }, []);
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
-    defaultValues: { review: "" }
-  })
+    defaultValues: { review: "" },
+  });
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    setSubmittedReview(data.review)
-    const classification = simulateAiClassification(data.review)
-    setAiClassification(classification)
-    setUserClassification(classification)
-    setConfirmedClassification(false)
-    setIsSubmitted(true)
-    toast("Thank you for submitting your review!")
+    setSubmittedReview(data.review);
+    const classification = simulateAiClassification(data.review);
+    setAiClassification(classification);
+    setUserClassification(classification);
+    setConfirmedClassification(false);
+    setIsSubmitted(true);
+    toast("Thank you for submitting your review!");
   }
 
   const handleClassificationUpdate = (newClassification: Classification) => {
-    setUserClassification(newClassification)
-    setConfirmedClassification(true)
-    toast.success(`Review sentiment set to: ${newClassification}`)
-  }
+    setUserClassification(newClassification);
+    setConfirmedClassification(true);
+    toast.success(`Review sentiment set to: ${newClassification}`);
+  };
 
   const handleSubmitChangedClassification = () => {
     if (pendingClassification) {
-      setUserClassification(pendingClassification)
-      setEditing(false)
-      setConfirmedClassification(true)
-      toast.success(`Review sentiment set to: ${pendingClassification}`)
+      setUserClassification(pendingClassification);
+      setEditing(false);
+      setConfirmedClassification(true);
+      toast.success(`Review sentiment set to: ${pendingClassification}`);
     }
-  }
+  };
 
   const resetForm = () => {
-    setIsSubmitted(false)
-    setSubmittedReview("")
-    setAiClassification(null)
-    setUserClassification(null)
-    setEditing(false)
-    setConfirmedClassification(false)
-    setPendingClassification(null)
-    form.reset()
-  }
+    setIsSubmitted(false);
+    setSubmittedReview("");
+    setAiClassification(null);
+    setUserClassification(null);
+    setEditing(false);
+    setConfirmedClassification(false);
+    setPendingClassification(null);
+    form.reset();
+  };
 
   return (
     <div className="max-w-screen-sm mx-auto w-full px-4 sm:px-6 my-12">
+      <div className="flex flex-col mb-6">
+        <p className="text-xs text-muted-foreground">
+          App frontend version: <span className="font-semibold ml-1 text-blue-500">{appFrontendVersion}</span>
+        </p>
+        <p className="text-xs text-muted-foreground">
+          App service version: 
+          {versionsLoading && <span className="font-semibold ml-1 text-foreground">Loading...</span>}
+          {versionsError && <span className="font-semibold ml-1 text-destructive">Disconnected</span>}
+          {!versionsLoading && !versionsError && serviceVersions && <span className="font-semibold ml-1 text-blue-500">{serviceVersions['app-service-version']}</span>}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Model service version: 
+          {versionsLoading && <span className="font-semibold ml-1 text-foreground">Loading...</span>}
+          {versionsError && <span className="font-semibold ml-1 text-destructive">Disconnected</span>}
+          {!versionsLoading && !versionsError && serviceVersions && <span className="font-semibold ml-1 text-blue-500">{serviceVersions['model-service-version']}</span>}
+        </p>
+      </div>
       {!isSubmitted ? (
         <>
           <h1 className="text-display-sm mb-2">Rate your visit to our restaurant</h1>
@@ -141,7 +186,7 @@ export default function Home() {
               <p className="text-sm text-muted-foreground">
                 Our AI model analyzed your review. Please confirm if the AI detected sentiment is correct or select a different sentiment.
               </p>
-              <div className="flex gap-6 justify-between items-center shadow-sm p-4 rounded-md">
+              <div className="flex flex-col sm:flex-row gap-6 justify-between items-start sm:items-center shadow-sm p-4 rounded-md"> {/* Adjusted for responsiveness */}
                 <div className="flex flex-col items-start gap-2">
                   <span className="text-sm font-medium">
                     {confirmedClassification && userClassification !== aiClassification && "AI detected sentiment was corrected to:"}
@@ -150,18 +195,18 @@ export default function Home() {
                   </span>
                   <div className="flex items-center gap-2">
                     <Badge variant={confirmedClassification && userClassification !== aiClassification ? "destructive" : (!confirmedClassification ? "default" : "success")}>
-                      {confirmedClassification && (userClassification !== aiClassification ? <X /> : <Check />)}
+                      {confirmedClassification && (userClassification !== aiClassification ? <X className="mr-1 h-3 w-3" /> : <Check className="mr-1 h-3 w-3" />)} {/* Added margin for icon */}
                       {aiClassification}
                     </Badge>
                     {confirmedClassification && userClassification !== aiClassification && (
                       <>
-                        <ArrowRight className="w-4" />
+                        <ArrowRight />
                         <Badge variant="default">{userClassification}</Badge>
                       </>
                     )}
                   </div>
                 </div>
-                <div className="flex flex-col items-start gap-2">
+                <div className="flex flex-col items-start gap-2"> 
                   {editing ? (
                     <div className="flex items-center gap-3">
                       <Select onValueChange={(value) => setPendingClassification(value as Classification)}>
@@ -181,16 +226,16 @@ export default function Home() {
                       </Button>
                     </div>
                   ) : (!confirmedClassification && (
-                    <div className="flex flex-wrap gap-3 items-center">
+                    <div className="flex flex-wrap gap-2 items-center"> 
                       <Button variant="outline" size="sm" onClick={() => handleClassificationUpdate(aiClassification!)}>
                         <Check />
                         Confirm sentiment
                       </Button>
                       <Button variant="destructive" size="sm" onClick={() => {
-                        setEditing(true)
-                        setPendingClassification(userClassification)
+                        setEditing(true);
+                        setPendingClassification(userClassification);
                       }}>
-                        <ArrowRightLeft />
+                        <ArrowRightLeft/>
                         Change
                       </Button>
                     </div>
@@ -202,5 +247,5 @@ export default function Home() {
         </>
       )}
     </div>
-  )
+  );
 }
