@@ -56,7 +56,6 @@ export default function Home() {
   const [versionsLoading, setVersionsLoading] = useState<boolean>(true);
   const [versionsError, setVersionsError] = useState<Error | null>(null);
 
-
   const appFrontendVersion = process.env.NEXT_PUBLIC_APP_VERSION || "NOT_SET";
 
   useEffect(() => {
