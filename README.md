@@ -86,15 +86,14 @@ This method runs the Next.js development server directly on your host machine.
 3.  **Set up environment variables:**
     Copy the template file to create your local environment configuration:
     ```bash
-    cp .env.template .env.local
+    cp .env.template .env
     ```
-    Edit the `.env.local` file and set the required values:
+    Edit the `.env` file and set the required values:
     ```ini
-    # .env.local
+    # .env
     NEXT_PUBLIC_APP_SERVICE_URL=http://localhost:5000 # Adjust if needed
-    NEXT_PUBLIC_APP_VERSION=native-local-0.1 # Or your desired local version
     ```
-    *Note: The `.env.local` file should be added to `.gitignore` and **not** committed to version control.*
+    *Note: The `.env` file should be added to `.gitignore` and **not** committed to version control.*
 
 4.  **Run the development server:**
     ```bash

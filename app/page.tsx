@@ -12,35 +12,18 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X, Check, ArrowRight, ArrowRightLeft, RefreshCcw } from "lucide-react";
-import { fetchAppServiceVersion, ServiceVersionInfo } from '@/services/appService';
+import { fetchAppServiceVersion, ServiceVersionInfo, predictSentimentReview } from '@/services/appService';
 
-const classifications = ["positive", "negative", "neutral"] as const;
+const classifications = ["positive", "negative"] as const;
 type Classification = typeof classifications[number];
+
+const mapPredictionToSentiment = (prediction: number): Classification => {
+  return prediction === 1 ? "positive" : "negative";
+};
 
 const FormSchema = z.object({
   review: z.string().min(1, { message: "Review must not be empty." }),
 });
-
-const simulateAiClassification = (reviewText: string): Classification => {
-  const lowerCaseReview = reviewText.toLowerCase();
-  if (
-    lowerCaseReview.includes("great") ||
-    lowerCaseReview.includes("excellent") ||
-    lowerCaseReview.includes("love") ||
-    lowerCaseReview.includes("amazing")
-  ) {
-    return "positive";
-  } else if (
-    lowerCaseReview.includes("bad") ||
-    lowerCaseReview.includes("terrible") ||
-    lowerCaseReview.includes("disappointing") ||
-    lowerCaseReview.includes("poor")
-  ) {
-    return "negative";
-  } else {
-    return "neutral";
-  }
-};
 
 export default function Home() {
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -55,7 +38,6 @@ export default function Home() {
   const [serviceVersions, setServiceVersions] = useState<ServiceVersionInfo | null>(null);
   const [versionsLoading, setVersionsLoading] = useState<boolean>(true);
   const [versionsError, setVersionsError] = useState<Error | null>(null);
-
 
   const appFrontendVersion = process.env.NEXT_PUBLIC_APP_VERSION || "NOT_SET";
 
@@ -84,13 +66,28 @@ export default function Home() {
   });
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    setSubmittedReview(data.review);
-    const classification = simulateAiClassification(data.review);
-    setAiClassification(classification);
-    setUserClassification(classification);
-    setConfirmedClassification(false);
-    setIsSubmitted(true);
-    toast("Thank you for submitting your review!");
+    try {
+      const prediction = await predictSentimentReview(data.review);
+      
+      if (!prediction || typeof prediction.prediction !== 'number') {
+        throw new Error('Invalid prediction response from service');
+      }
+      const classification = mapPredictionToSentiment(prediction.prediction);
+      setIsSubmitted(true);
+      setSubmittedReview(data.review);
+      setAiClassification(classification);
+      setUserClassification(classification);
+      setConfirmedClassification(false);
+      toast.success("Thank you for submitting your review!");
+    } catch (err) {
+      setIsSubmitted(false);
+      setSubmittedReview("");
+      
+      console.error("Error predicting review sentiment:", err);
+      toast.error(
+        "Failed to predict review sentiment. Please try again later."
+      );
+    }
   }
 
   const handleClassificationUpdate = (newClassification: Classification) => {
@@ -154,7 +151,7 @@ export default function Home() {
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Textarea placeholder="Please enter your review here..." rows={5} {...field} />
+                      <Textarea placeholder="Please enter your review here..." rows={5} disabled={form.formState.isSubmitting} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

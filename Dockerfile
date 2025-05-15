@@ -1,5 +1,7 @@
 FROM node:23-alpine AS base
 
+ARG NEXT_PUBLIC_APP_VERSION=NOT_SET
+
 FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
@@ -10,6 +12,10 @@ RUN npm ci
 
 FROM base AS builder
 WORKDIR /app
+
+ENV NEXT_PUBLIC_APP_VERSION=${NEXT_PUBLIC_APP_VERSION}
+ENV NODE_ENV=production
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
@@ -19,8 +25,9 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
-
 ENV NODE_ENV=production
+ENV HOSTNAME="0.0.0.0"
+ENV PORT=3000
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -31,13 +38,6 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
 
-
-ARG NEXT_PUBLIC_APP_VERSION=NOT_SET
-ENV NEXT_PUBLIC_APP_VERSION=${NEXT_PUBLIC_APP_VERSION}
-
-ENV HOSTNAME="0.0.0.0"
-
-ENV PORT=3000
 EXPOSE 3000
 
 CMD ["node", "server.js"]
