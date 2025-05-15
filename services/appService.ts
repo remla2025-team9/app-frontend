@@ -7,21 +7,30 @@ export interface SentimentPrediction {
     prediction: number;
 };
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_SERVICE_URL;
+let baseUrl: string | null = null;
+
+async function getBaseUrl() {
+    if (baseUrl) return baseUrl;
+    
+    const response = await fetch('/api/config');
+    const config = await response.json();
+    baseUrl = config.appServiceUrl;
+    return baseUrl;
+}
 
 export async function fetchAppServiceVersion(): Promise<ServiceVersionInfo> {
-  
-    if (!baseUrl) {
-      const errorMessage = 'Configuration Error: NEXT_PUBLIC_APP_SERVICE_URL is not defined.';
-      console.error(errorMessage);
-
-      throw new Error(errorMessage);
+    const url = await getBaseUrl();
+    
+    if (!url) {
+        const errorMessage = 'Configuration Error: APP_SERVICE_URL is not defined.';
+        console.error(errorMessage);
+        throw new Error(errorMessage);
     }
   
-    const url = `${baseUrl.replace(/\/$/, '')}/version`;
+    const versionUrl = `${url.replace(/\/$/, '')}/version`;
   
     try {
-      const response = await fetch(url, {
+      const response = await fetch(versionUrl, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -37,19 +46,21 @@ export async function fetchAppServiceVersion(): Promise<ServiceVersionInfo> {
 }
 
 export async function predictSentimentReview(review: string): Promise<SentimentPrediction> {
-    if (!baseUrl) {
-        const errorMessage = 'Configuration Error: NEXT_PUBLIC_APP_SERVICE_URL is not defined.';
+    const url = await getBaseUrl();
+    
+    if (!url) {
+        const errorMessage = 'Configuration Error: APP_SERVICE_URL is not defined.';
         console.error(errorMessage);
         throw new Error(errorMessage);
     }
 
-    const url = `${baseUrl.replace(/\/$/, '')}/predict-sentiment-review`;
+    const predictUrl = `${url.replace(/\/$/, '')}/predict-sentiment-review`;
 
     try {
         const body = JSON.stringify({ 
           'review': review
         });
-        const response = await fetch(url, {
+        const response = await fetch(predictUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
