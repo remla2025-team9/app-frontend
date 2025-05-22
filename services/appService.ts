@@ -79,3 +79,37 @@ export async function predictSentimentReview(review: string): Promise<SentimentP
         throw new Error(`Error predicting sentiment: ${error}`);
     }
 }
+
+export async function confirmPrediction(action: string, originalLabel: string, correctedLabel?: string): Promise<void> {
+    const url = await getBaseUrl();    
+    
+    if (!url) {
+        const errorMessage = 'Configuration Error: APP_SERVICE_URL is not defined.';
+        console.error(errorMessage);
+        throw new Error(errorMessage);
+    }
+    const confirmUrl = `${url.replace(/\/$/, '')}/reviews/confirm`;
+
+    try {
+        const body = JSON.stringify({ 
+          'action': action,
+          'originalLabel': originalLabel,
+          'correctedLabel': correctedLabel,
+        });
+        const response = await fetch(confirmUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: body,
+        });
+        if (!response.ok) {
+            throw new Error(`Error: ${response.status} ${response.statusText}`);
+        }
+        return
+    }
+    catch (error) {
+        throw new Error(`Error confirming prediction: ${error}`);
+    }
+}
