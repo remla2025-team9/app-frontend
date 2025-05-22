@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X, Check, ArrowRight, ArrowRightLeft, RefreshCcw } from "lucide-react";
-import { fetchAppServiceVersion, ServiceVersionInfo, predictSentimentReview } from '@/services/appService';
+import { fetchAppServiceVersion, ServiceVersionInfo, predictSentimentReview, confirmPrediction } from '@/services/appService';
 
 const classifications = ["positive", "negative"] as const;
 type Classification = typeof classifications[number];
@@ -90,17 +90,19 @@ export default function Home() {
     }
   }
 
-  const handleClassificationUpdate = (newClassification: Classification) => {
+  const handleClassificationUpdate = async (newClassification: Classification) => {
     setUserClassification(newClassification);
     setConfirmedClassification(true);
+    await confirmPrediction('confirm', aiClassification!, newClassification);
     toast.success(`Review sentiment set to: ${newClassification}`);
   };
 
-  const handleSubmitChangedClassification = () => {
+  const handleSubmitChangedClassification = async () => {
     if (pendingClassification) {
       setUserClassification(pendingClassification);
       setEditing(false);
       setConfirmedClassification(true);
+      await confirmPrediction('override', aiClassification!, pendingClassification);
       toast.success(`Review sentiment set to: ${pendingClassification}`);
     }
   };
