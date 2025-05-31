@@ -159,7 +159,7 @@ export default function Home() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={form.formState.isSubmitting}>
+              <Button className="bg-pink-500 hover:bg-pink-400" type="submit" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? "Submitting..." : "Submit review"}
               </Button>
             </form>
