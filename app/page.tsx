@@ -159,7 +159,7 @@ export default function Home() {
                   </FormItem>
                 )}
               />
-              <Button className="bg-pink-500" type="submit" disabled={form.formState.isSubmitting}>
+              <Button type="submit" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? "Submitting..." : "Submit review"}
               </Button>
             </form>
@@ -220,7 +220,7 @@ export default function Home() {
                           ))}
                         </SelectContent>
                       </Select>
-                      <Button className="bg-pink-500" size="sm" onClick={handleSubmitChangedClassification} disabled={!pendingClassification}>
+                      <Button size="sm" onClick={handleSubmitChangedClassification} disabled={!pendingClassification}>
                         Change
                       </Button>
                     </div>
