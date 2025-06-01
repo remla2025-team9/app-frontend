@@ -29,6 +29,7 @@ export default function Home() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedReview, setSubmittedReview] = useState("");
   const [aiClassification, setAiClassification] = useState<Classification | null>(null);
+  const [aiClassificationConfidence, setAiClassificationConfidence] = useState<number | null>(null);
   const [userClassification, setUserClassification] = useState<Classification | null>(null);
   const [editing, setEditing] = useState(false);
   const [pendingClassification, setPendingClassification] = useState<Classification | null>(null);
@@ -73,9 +74,11 @@ export default function Home() {
         throw new Error('Invalid prediction response from service');
       }
       const classification = mapPredictionToSentiment(prediction.prediction);
+      const predictionConfidence = prediction.prediction_confidence;
       setIsSubmitted(true);
       setSubmittedReview(data.review);
       setAiClassification(classification);
+      setAiClassificationConfidence(predictionConfidence);
       setUserClassification(classification);
       setConfirmedClassification(false);
       toast.success("Thank you for submitting your review!");
@@ -193,9 +196,14 @@ export default function Home() {
                     {!confirmedClassification && "AI detected sentiment:"}
                   </span>
                   <div className="flex items-center gap-2">
-                    <Badge variant={confirmedClassification && userClassification !== aiClassification ? "destructive" : (!confirmedClassification ? "default" : "success")}>
-                      {confirmedClassification && (userClassification !== aiClassification ? <X className="mr-1 h-3 w-3" /> : <Check className="mr-1 h-3 w-3" />)} {/* Added margin for icon */}
+                    <Badge className="items-center" variant={confirmedClassification && userClassification !== aiClassification ? "destructive" : (!confirmedClassification ? "default" : "success")}>
+                      {confirmedClassification && (userClassification !== aiClassification ? <X className="mr-1 h-3 w-3" /> : <Check className="mr-1 h-3 w-3" />)} 
                       {aiClassification}
+                      { aiClassificationConfidence !== null && (
+                        <span className="ml-1 text-xs text-primary-foreground opacity-80">
+                          ({(aiClassificationConfidence * 100).toFixed(1)}% confidence)
+                        </span>
+                      )}
                     </Badge>
                     {confirmedClassification && userClassification !== aiClassification && (
                       <>

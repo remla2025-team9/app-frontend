@@ -5,6 +5,7 @@ export interface ServiceVersionInfo {
 
 export interface SentimentPrediction {
     prediction: number;
+    prediction_confidence: number;
 };
 
 let baseUrl: string | null = null;
