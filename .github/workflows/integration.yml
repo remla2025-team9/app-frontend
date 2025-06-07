@@ -1,5 +1,7 @@
+# This workflow runs integration tests on pull requests to ensure code quality before merging
 name: Integration
 
+# Triggers workflow on pull requests to the main branch, excluding documentation changes
 on:
   pull_request:
     branches: [main] 
@@ -10,19 +12,23 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
+      # Checks out the repository code for testing
       - name: Checkout source
         uses: actions/checkout@v4
 
+      # Sets up Node.js environment with caching for faster dependency installation
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: 23
           cache: npm
 
+      # Installs project dependencies using clean install
       - name: Install dependencies
         run: |
           npm ci
 
+      # Runs linting and code formatting checks
       - name: Lint and format check
         run: |
           npm run lint
@@ -35,6 +41,7 @@ jobs:
       - name: Set up docker buildx
         uses: docker/setup-buildx-action@v3
 
+      # Validates that the Docker image builds successfully for multiple architectures without pushing
       - name: Build docker image for multi-architecture
         id: docker_build_validate
         uses: docker/build-push-action@v5
