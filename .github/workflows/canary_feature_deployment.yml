@@ -103,11 +103,22 @@ jobs:
         cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache
         cache-to: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache,mode=max,image-manifest=true
         
-    # Creates a Git tag for this feature branch with a matching version format
-    - name: Create Git tag for feature branch
+    # Sets up Git identity for automated commits
+    - name: Configure Git
       run: |
         git config user.name "${{ env.GIT_USER_NAME }}"
         git config user.email "${{ env.GIT_USER_EMAIL }}"
+        git remote set-url origin git@github.com:${{ github.repository }}.git
+
+    # Sets up SSH for pushing changes to the repository to bypass branch protection rules
+    - name: Setup SSH for pushing
+      uses: webfactory/ssh-agent@v0.9.0
+      with:
+        ssh-private-key: ${{ secrets.DEPLOY_KEY_PRIVATE }}
+
+    # Creates a Git tag for this feature branch with a matching version format
+    - name: Create Git tag for feature branch
+      run: |
         echo "Creating tag: ${{ steps.version_tag.outputs.tag }}"
         git tag -a "${{ steps.version_tag.outputs.tag }}" -m "Canary feature deployment for ${{ steps.feature_tag_name.outputs.feature_tag }}"
         git push origin "${{ steps.version_tag.outputs.tag }}"
