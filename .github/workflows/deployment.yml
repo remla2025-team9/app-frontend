@@ -1,5 +1,5 @@
 # This workflow handles the stable release cycle process, including version bumping, GitHub releases,
-# Docker image building/publishing, and maintaining the development versioning between releases.
+# Docker image building/publishing, and 19-update-release-workflow-to-add-a-releasetaining the development versioning between releases.
 name: Deployment
 
 # Defines the workflow to be manually triggered with options to specify the version bump level
@@ -61,7 +61,7 @@ jobs:
       uses: mathieudutour/github-tag-action@v6.2
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        release_branches: main
+        release_branches: 19-update-release-workflow-to-add-a-release
         default_bump: ${{ github.event.inputs.bump_level }}  
         tag_prefix: v
     
@@ -122,12 +122,12 @@ jobs:
     # Bumps version to next pre-release for continued development
     - name: Bump patch and add pre tag
       id: bump_patch
-      if: github.ref == 'refs/heads/main'
+      if: github.ref == 'refs/heads/19-update-release-workflow-to-add-a-release'
       uses: mathieudutour/github-tag-action@v6.2
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         release_branches: '_NONE_'
-        pre_release_branches: main
+        pre_release_branches: 19-update-release-workflow-to-add-a-release
         default_prerelease_bump: prerelease      
         append_to_pre_release_tag: pre        
         tag_prefix: v
