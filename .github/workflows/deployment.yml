@@ -73,45 +73,45 @@ jobs:
         name: Release ${{ steps.bump_stable_tag.outputs.new_tag }}
         body: ${{ steps.bump_stable_tag.outputs.changelog }}    
 
-    # Sets up QEMU for multi-architecture container builds
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v3
+    # # Sets up QEMU for multi-architecture container builds
+    # - name: Set up QEMU
+    #   uses: docker/setup-qemu-action@v3
 
-    # Configures Docker Buildx for multi-platform image builds
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+    # # Configures Docker Buildx for multi-platform image builds
+    # - name: Set up Docker Buildx
+    #   uses: docker/setup-buildx-action@v3
 
-    # Creates metadata for Docker image including tags and labels
-    - name: Generate image metadata (tags, labels)
-      id: meta
-      uses: docker/metadata-action@v5
-      with:
-        images: ${{ env.IMAGE_NAME }}       
-        tags: |
-          type=sha,enable=false
-          type=raw,value=latest
-          type=raw,value=${{ steps.bump_stable_tag.outputs.new_tag }}
+    # # Creates metadata for Docker image including tags and labels
+    # - name: Generate image metadata (tags, labels)
+    #   id: meta
+    #   uses: docker/metadata-action@v5
+    #   with:
+    #     images: ${{ env.IMAGE_NAME }}       
+    #     tags: |
+    #       type=sha,enable=false
+    #       type=raw,value=latest
+    #       type=raw,value=${{ steps.bump_stable_tag.outputs.new_tag }}
 
-    # Authenticates with GitHub Container Registry
-    - name: Log in to GHCR
-      uses: docker/login-action@v3
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+    # # Authenticates with GitHub Container Registry
+    # - name: Log in to GHCR
+    #   uses: docker/login-action@v3
+    #   with:
+    #     registry: ghcr.io
+    #     username: ${{ github.actor }}
+    #     password: ${{ secrets.GITHUB_TOKEN }}
 
-    # Builds and pushes the Docker image to GHCR with appropriate tags
-    - name: Build & push docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        platforms: linux/amd64,linux/arm64
-        push: true
-        tags:   ${{ steps.meta.outputs.tags }}
-        build-args: |
-          NEXT_PUBLIC_APP_VERSION=${{ steps.bump_stable_tag.outputs.new_tag }}
-        cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache
-        cache-to: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache,mode=max,image-manifest=true
+    # # Builds and pushes the Docker image to GHCR with appropriate tags
+    # - name: Build & push docker image
+    #   uses: docker/build-push-action@v5
+    #   with:
+    #     context: .
+    #     platforms: linux/amd64,linux/arm64
+    #     push: true
+    #     tags:   ${{ steps.meta.outputs.tags }}
+    #     build-args: |
+    #       NEXT_PUBLIC_APP_VERSION=${{ steps.bump_stable_tag.outputs.new_tag }}
+    #     cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache
+    #     cache-to: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache,mode=max,image-manifest=true
 
     # Creates an empty commit to start the next development cycle
     - name: Create next pre-release commit
