@@ -52,7 +52,7 @@ jobs:
     # Creates an empty commit to mark the stable release
     - name: Create stable release commit
       run: |
-        git commit --allow-empty -m "Stable release commit triggered by GitHub deployment action"
+        git commit --allow-empty -m "Stable release commit triggered by GitHub deployment action [skip ci]"
         git push
     
     # Increments the version tag based on bump level (patch, minor, major)
@@ -116,7 +116,7 @@ jobs:
     # Creates an empty commit to start the next development cycle
     - name: Create next pre-release commit
       run: |
-        git commit --allow-empty -m "New pre-release commit triggered by GitHub deployment action"
+        git commit --allow-empty -m "New pre-release commit triggered by GitHub deployment action [skip ci]"
         git push
 
     # Bumps version to next pre-release for continued development
