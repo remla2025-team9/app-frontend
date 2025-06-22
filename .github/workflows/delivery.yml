@@ -1,9 +1,13 @@
+# Workflow for continuous delivery processes on direct commits to main branch
 name: Delivery
 
+# Triggers workflow on pushes to the main branch only, excluding tag pushes
 on:
   push:
     branches: [main]
+    tags-ignore: ['**']  # Ignores all tag pushes
 
+# Grants workflow permission to write to repository contents
 permissions:
   contents: write
 
@@ -12,10 +16,12 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
+    # Checks out the repository code with full history
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
+    # Creates a new pre-release tag with incremented version
     - name: Create new pre-release tag
       id: tag_version
       uses: mathieudutour/github-tag-action@v6.2

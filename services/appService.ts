@@ -19,6 +19,22 @@ async function getBaseUrl() {
     return baseUrl;
 }
 
+function getAppVersionHeader(): Record<string, string> {
+    if (typeof document === 'undefined') {
+        return {};
+    }
+    
+    const cookies = document.cookie.split(';');
+    const appVersionCookie = cookies.find(cookie => cookie.trim().startsWith('app-version='));
+    
+    if (appVersionCookie) {
+        const appVersion = appVersionCookie.split('=')[1];
+        return { 'X-App-Version': appVersion };
+    }
+    
+    return {};
+}
+
 export async function fetchAppServiceVersion(): Promise<ServiceVersionInfo> {
     const url = await getBaseUrl();
     
@@ -35,6 +51,7 @@ export async function fetchAppServiceVersion(): Promise<ServiceVersionInfo> {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
+            ...getAppVersionHeader(),
         },
       });
   
@@ -61,11 +78,13 @@ export async function predictSentimentReview(review: string): Promise<SentimentP
         const body = JSON.stringify({ 
           'review': review
         });
+        
         const response = await fetch(predictUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
+                ...getAppVersionHeader(),
             },
             body: body,
         });
@@ -102,6 +121,7 @@ export async function confirmPrediction(action: string, originalLabel: string, c
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
+                ...getAppVersionHeader(),
             },
             body: body,
         });
