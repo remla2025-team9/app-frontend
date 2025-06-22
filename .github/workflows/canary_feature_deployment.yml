@@ -99,7 +99,7 @@ jobs:
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
-          NEXT_PUBLIC_APP_VERSION="${{ steps.version_tag.outputs.tag }}"
+          NEXT_PUBLIC_APP_VERSION=${{ steps.version_tag.outputs.tag }}
         cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache
         cache-to: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache,mode=max,image-manifest=true
         
