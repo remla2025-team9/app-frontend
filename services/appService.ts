@@ -1,5 +1,6 @@
 export interface ServiceVersionInfo {
     'app-service-version': string;
+    'lib-version': string;
     'model-service-version': string;
 }
 
