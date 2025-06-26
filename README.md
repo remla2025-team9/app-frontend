@@ -45,16 +45,11 @@ This method uses the container configuration.
     You need to map a port on your host machine to the port the application listens on inside the container (controlled by the `PORT` environment variable, typically 3000 if not overridden) and provide the necessary environment variables.
 
     ```bash
-    docker run \
-      -p 8080:3000 \
-      -e PORT=3000 \
-      -e NEXT_PUBLIC_APP_SERVICE_URL="http://localhost:5000" \
-      --name nextjs-review-container \
-      -d my-nextjs-review-app
+    docker run -p 8080:3000 -e PORT=3000 -e APP_SERVICE_URL="http://localhost:5000" --name nextjs-review-container -d my-nextjs-review-app
     ```
     *   `-p 8080:3000`: Maps port 8080 on your host to port 3000 inside the container.
     *   `-e PORT=3000`: Tells the Next.js app *inside* the container to listen on port 3000.
-    *   `-e NEXT_PUBLIC_APP_SERVICE_URL=...`: Sets the backend service URL. Adjust if your backend runs elsewhere.
+    *   `-e APP_SERVICE_URL=...`: Sets the backend service URL. Adjust if your backend runs elsewhere.
     *   `-e NEXT_PUBLIC_APP_VERSION=...`: Sets the app version for display.
     *   `--name ...`: Assigns a name to the running container (optional).
     *   `-d`: Runs the container in detached mode (in the background).
@@ -91,7 +86,7 @@ This method runs the Next.js development server directly on your host machine.
     Edit the `.env` file and set the required values:
     ```ini
     # .env
-    NEXT_PUBLIC_APP_SERVICE_URL=http://localhost:5000 # Adjust if needed
+    APP_SERVICE_URL=http://localhost:5000 # Adjust if needed
     ```
     *Note: The `.env` file should be added to `.gitignore` and **not** committed to version control.*
 
@@ -112,11 +107,30 @@ This method runs the Next.js development server directly on your host machine.
 
 This application requires the following environment variables:
 
-| Variable                      | Description                                                                                                          | Where Used       | Exposed to Browser?  | How Set                                                              |
-| :---------------------------- | :------------------------------------------------------------------------------------------------------------------- | :--------------- | :------------------- | :------------------------------------------------------------------- |
-| `NEXT_PUBLIC_APP_SERVICE_URL` | The base URL for the backend API service where reviews are submitted.                                                | Client           | Yes (`NEXT_PUBLIC_`) | Via `docker run -e` or set in `.env.local` for native development.   |
-| `PORT`                        | The port the Next.js server listens on **inside the container** or when running `next start`. Ignored by `next dev`. | Server (Next.js) | No                   | Via `docker run -e`. For native dev, use `npm run dev -- -p <port>`. |
+| Variable          | Description                                                                                                          | Where Used       | Exposed to Browser? | How Set                                                              |
+| :---------------- | :------------------------------------------------------------------------------------------------------------------- | :--------------- | :------------------ | :------------------------------------------------------------------- |
+| `APP_SERVICE_URL` | The base URL for the backend API service where reviews are submitted.                                                | Server (Next.js) | No                  | Via `docker run -e` or set in `.env.local` for native development.   |
+| `PORT`            | The port the Next.js server listens on **inside the container** or when running `next start`. Ignored by `next dev`. | Server (Next.js) | No                  | Via `docker run -e`. For native dev, use `npm run dev -- -p <port>`. |
 
 **Important:**
 
 *   Variables prefixed with `NEXT_PUBLIC_` are exposed to the browser. **Do not put secrets in these variables.**
+
+## GitHub Workflows & Versioning
+
+This project uses automated GitHub workflows for continuous integration and deployment:
+
+- **Integration** (`#integration`): Runs on pull requests to validate code quality, linting, and Docker builds
+- **Delivery** (`#delivery`): Creates pre-release tags on commits to main branch for continuous delivery
+- **Deployment** (`#deployment`): Manually triggered workflow for stable releases (patch/minor/major versioning)
+- **Canary Feature Deployment** (`#canary_feature_deployment`): Builds experimental feature images for testing
+
+### Versioning
+
+The application version is automatically managed through Git tags:
+- Development builds use pre-release tags (e.g., `v1.0.1-pre.1`)
+- Stable releases use semantic versioning (e.g., `v1.0.1`)
+- The `NEXT_PUBLIC_APP_VERSION` environment variable is set during Docker image builds and displayed in the application UI
+- The app version is based on the previous GitHub version tags, that are the single source of truth regarding versioning
+
+**Note:** When building Docker images for releases, the app version is automatically injected as a build argument and becomes available as an environment variable within the container.

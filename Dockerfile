@@ -1,3 +1,7 @@
+# Multi-stage Dockerfile for a Next.js application
+# This Dockerfile builds a production-ready image for a Next.js app using Node.js 23
+
+# Base stage used for all other stages
 FROM node:23-alpine AS base
 
 ARG NEXT_PUBLIC_APP_VERSION=NOT_SET
@@ -9,7 +13,7 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci 
 
-
+# Builder stage
 FROM base AS builder
 WORKDIR /app
 
@@ -21,7 +25,7 @@ COPY . .
 
 RUN npm run build
 
-# Production image, copy all the files and run next
+# Runner stage, which contains the production-ready application
 FROM base AS runner
 WORKDIR /app
 

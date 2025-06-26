@@ -136,6 +136,12 @@ export default function Home() {
           {versionsError && <span className="font-semibold ml-1 text-destructive">Disconnected</span>}
           {!versionsLoading && !versionsError && serviceVersions && <span className="font-semibold ml-1 text-blue-500">{serviceVersions['model-service-version']}</span>}
         </p>
+        <p className="text-xs text-muted-foreground">
+          Lib-version library version: 
+          {versionsLoading && <span className="font-semibold ml-1 text-foreground">Loading...</span>}
+          {versionsError && <span className="font-semibold ml-1 text-destructive"> Disconnected</span>}
+          {!versionsLoading && !versionsError && serviceVersions && <span className="font-semibold ml-1 text-blue-500">{serviceVersions['lib-version']}</span>}
+        </p>
       </div>
       {!isSubmitted ? (
         <>
